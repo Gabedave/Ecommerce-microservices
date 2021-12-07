@@ -1,0 +1,64 @@
+version: '3'
+services:
+  customer_service:
+    build:
+      context: ./customer_service
+      dockerfile: Dockerfile
+    container_name: customer_service
+    restart: unless-stopped
+    env_file: customer_service/.env
+    environment:
+      - MONGO_URI=mongodb://YouVerifyTask:passwordTask1@mongodb/youverify_task?authSource=admin
+    ports:
+      - 5000:5000
+    
+  order_service:
+    build:
+      context: ./order_service
+      dockerfile: Dockerfile
+    container_name: order_service
+    restart: unless-stopped
+    env_file: order_service/.env
+    environment:
+      - MONGO_URI=mongodb://YouVerifyTask:passwordTask1@mongodb/youverify_task?authSource=admin
+      - CUSTOMER_SERVICE_URI=http://customer_service:5000/api/v1/customers
+      - PRODUCT_SERVICE_URI=http://product_service:5300/api/v1/products
+      - PAYMENT_SERVICE_URI=http://payment_service:5200/api/v1/payment
+    ports:
+      - 5100:5100
+
+  payment_service:
+    build:
+      context: ./payment_service
+      dockerfile: Dockerfile
+    container_name: payment_service
+    restart: unless-stopped
+    env_file: payment_service/.env
+    environment:
+      - MONGO_URI=mongodb://YouVerifyTask:passwordTask1@mongodb/youverify_task?authSource=admin
+      - RABBITMQ_URI=amqp://:@message_queue
+    ports:
+      - 5200:5200
+
+  product_service:
+    build:
+      context: ./product_service
+      dockerfile: Dockerfile
+    container_name: product_service
+    restart: unless-stopped
+    env_file: product_service/.env
+    environment:
+      - MONGO_URI=mongodb://YouVerifyTask:passwordTask1@mongodb/youverify_task?authSource=admin
+    ports:
+      - 5300:5300
+
+  message_queue:
+    image: rabbitmq
+
+  mongodb:
+    image: mongo:5.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=YouVerifyTask
+      - MONGO_INITDB_ROOT_PASSWORD=passwordTask1
+    ports:
+      - 27017:27017
