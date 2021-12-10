@@ -4,6 +4,6 @@ const { pay } = require('../controllers/pay');
 
 const router = express.Router();
 
-router.get('/', pay);
+router.post('/pay', pay);
     
 module.exports = router;

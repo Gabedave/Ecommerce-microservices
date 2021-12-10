@@ -7,7 +7,7 @@ const product = require('./api/product')
 
 const connectDB = require('./config/db');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5300;
 
 // Load environment variables via config.env if in development
 dotenv.config();

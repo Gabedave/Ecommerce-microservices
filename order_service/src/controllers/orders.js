@@ -8,30 +8,30 @@ const Order  = require('../models/Order');
 exports.createOrder = async (req, res) => {
     try {
         let { username, productId, amount} = req.body;
+
         let customer
         let product
 
         if (process.env.TEST) {
             customer = {
-                _id: '12134244544',
+                _id: 12134244544,
                 username: 'customerA',
                 email: 'customerA@gmail.com',
                 firstName: 'customer',
                 lastName: 'A'
             }
             product = {
-                _id: '12343543533',
+                _id: 12343543533,
                 productId: 'product1234',
                 name: 'table',
                 description: 'short table',
                 price: 5.99
             }
         } else {
-            customer = await customerService.getCustomerByUsername(username)
+            customer = await customerService.getCustomerById(username)
             product = await productService.getProductById(productId)
-            if (!customer && !product) throw new Error("Customer or Product missing")
+            if (customer === [] || product === []) throw new Error("Customer or Product missing")
         }
-        
 
         const session = await mongoose.startSession()
 
@@ -39,16 +39,19 @@ exports.createOrder = async (req, res) => {
 
         await session.withTransaction(async () => {
             const data = new Order({
-                customerId: customer._id,
-                productId: product._id,
-                amount: amount,
+                customerId: customer[0]._id,
+                productId: product[0]._id,
+                amount: Number(amount),
                 orderStatus: 'pending'
             });
 
+            order = await data.save({session});
+
             pay = await paymentService.pay(data);
             if (!pay) throw new Error('Payment Failed');
-            order = await data.save();
 
+            console.log("....Order sent for Payment")
+            
         })
 
         session.endSession();
@@ -62,8 +65,8 @@ exports.createOrder = async (req, res) => {
         return res.status(201).json({
             success: true,
             data: {
-                customerId: customer._id,
-                productId: product._id,
+                customerId: username,
+                productId: productId,
                 orderId: _id,
                 orderStatus: 'pending',
             }
@@ -72,7 +75,7 @@ exports.createOrder = async (req, res) => {
         return res.status(500).json({
             success: false,
             errors: {
-                error: 'Order failed. Try again.'
+                error: `Order failed. Try again. ${err}`
             }
         });
     }

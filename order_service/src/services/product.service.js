@@ -2,12 +2,18 @@ request = require('request')
 
 exports.getProductById = async (productId) => {
     try {
-        const product = await request({
-            url: process.env.PRODUCT_SERVICE_URI + `/getProduct/${productId}`,
-            method: 'GET',
-            headers: { "Content-Type": "application/json" }
+        return new Promise(resolve => {
+            url = process.env.PRODUCT_SERVICE_URI + `/getProduct/${productId}`
+            request({
+                url: url,
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                json: true
+            }, function (error, response, body) {
+                if(!error)
+                    resolve(body);
+            })
         })
-        .then((res) => res.json())
         .then((json) => {
             if (json.success) return json.data
             else throw new Error()
@@ -21,15 +27,17 @@ exports.getProductById = async (productId) => {
 
 exports.addProduct = async (data) => {
     try {
-        const product = await request({
-            url: process.env.PRODUCT_SERVICE_URI + `/addProduct`,
-            method: 'PUT',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: data
+        return new Promise(resolve => {
+            request({
+                url: process.env.PRODUCT_SERVICE_URI + `/addCustomer`,
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: data
+            }, function (error, response, body) {
+                if(!error)
+                    resolve(body);
+            })
         })
-        .then((res) => res.json())
         .then((json) => {
             if (json.success) return json.data
             else throw new Error()

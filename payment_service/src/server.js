@@ -4,17 +4,18 @@ const dotenv = require('dotenv');
 const helmet = require('helmet');
 
 const payment = require('./api/payment')
-const worker = require('./services/worker')
 
 const connectDB = require('./config/db');
+// const connectMQ = require('./config/mq');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5200;
 
 // Load environment variables via config.env if in development
 dotenv.config();
 
 // Connect to database
 connectDB();
+// const channel = connectMQ();
 
 const app = express();
 
@@ -32,8 +33,6 @@ const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 });
 
-worker()
-
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   console.error(err)
@@ -41,4 +40,5 @@ process.on('unhandledRejection', (err, promise) => {
   // Close server and exit process
   server.close(() => process.exit(10));
 });
+
 

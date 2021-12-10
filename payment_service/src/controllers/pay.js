@@ -1,3 +1,6 @@
+const connectRabbitMQ = require('../config/mq')
+
+const channel = connectRabbitMQ()
 const publish = require('../services/publisher');
 
 exports.pay = async (req, res) => {
@@ -10,15 +13,20 @@ exports.pay = async (req, res) => {
             customerId,
             productId,
             amount }
-        const response = await publish(data)
+        const response = await publish(await channel, data)
 
         if (!response) throw new Error('Payment failed')
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             data: data
         });
     } catch (err) {
-        return returnError(err, res, 500, 'Payment failed. Try again.');
+        return res.status(500).json({
+            success: false,
+            errors: {
+                error: `Payment failed. Try again. ${err}`
+            }
+        });
     }
 };
