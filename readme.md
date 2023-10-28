@@ -1,6 +1,4 @@
-# Interview Task for YouVerify
-
-This is the solution to the youverify interview task
+# Simple Ecommerce App as Microservices
 
 ### Stack
 Simple Ecommerce as microservices with MongoDB database.
